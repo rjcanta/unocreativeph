@@ -50,16 +50,79 @@ export const site = {
   ],
 } as const;
 
-export const navLinks = [
+export type NavLeaf = {
+  href: string;
+  label: string;
+  /** Shown under the label inside dropdowns. */
+  description?: string;
+};
+
+export type NavItem = NavLeaf | { label: string; items: NavLeaf[] };
+
+export function isNavGroup(
+  item: NavItem,
+): item is { label: string; items: NavLeaf[] } {
+  return "items" in item;
+}
+
+/**
+ * Five top-level entries. Every page stays one hover away — a realtor's nav
+ * competes with the page itself for attention, and eight links lose.
+ */
+export const navLinks: NavItem[] = [
   { href: "/listings", label: "Listings" },
-  { href: "/buy", label: "Buy" },
-  { href: "/sell", label: "Sell" },
-  { href: "/home-value", label: "Home Value" },
-  { href: "/commercial", label: "Commercial" },
-  { href: "/invest", label: "Invest" },
-  { href: "/neighborhoods", label: "Neighborhoods" },
+  {
+    label: "Buy",
+    items: [
+      {
+        href: "/buy",
+        label: "Buy a Home",
+        description: "Representation, process and what it costs",
+      },
+      {
+        href: "/neighborhoods",
+        label: "Neighborhood Guides",
+        description: "Prices and market notes by submarket",
+      },
+      {
+        href: "/calculators",
+        label: "Mortgage Calculator",
+        description: "Your real monthly payment, all in",
+      },
+    ],
+  },
+  {
+    label: "Sell",
+    items: [
+      {
+        href: "/home-value",
+        label: "What's My Home Worth?",
+        description: "Free written valuation in one business day",
+      },
+      {
+        href: "/sell",
+        label: "Sell Your Home",
+        description: "Pricing, marketing and negotiation",
+      },
+    ],
+  },
+  {
+    label: "Invest",
+    items: [
+      {
+        href: "/invest",
+        label: "Investment Strategy",
+        description: "Build a portfolio on real numbers",
+      },
+      {
+        href: "/commercial",
+        label: "Commercial Real Estate",
+        description: "Office, retail, industrial and land",
+      },
+    ],
+  },
   { href: "/about", label: "About" },
-] as const;
+];
 
 export const footerColumns = [
   {
