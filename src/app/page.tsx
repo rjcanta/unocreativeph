@@ -45,8 +45,7 @@ const services = [
  * see docs/HERO-VIDEO.md for encoding settings and what makes a good clip.
  * The poster is what everyone sees first, and all that phones ever see.
  */
-const heroPoster =
-  "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=1800&q=85";
+const heroPoster = "/kelly/portrait-bridge.jpg";
 // Set this to your video path(s) to switch the hero to video, e.g.
 //   ["/hero/hero.webm", "/hero/hero.mp4"]
 // See docs/HERO-VIDEO.md. Leave undefined to keep the poster image.
@@ -59,7 +58,12 @@ export default function HomePage() {
     <>
       {/* Hero — drops in a video automatically once one exists at the path in
           heroVideo below. Until then the poster image carries it. */}
-      <HeroMedia poster={heroPoster} videoSrc={heroVideo}>
+      <HeroMedia
+        layout="split"
+        poster={heroPoster}
+        videoSrc={heroVideo}
+        mediaPosition="center 22%"
+      >
         <div className="max-w-2xl text-white">
           <Eyebrow>Residential · Commercial · Investment</Eyebrow>
             <h1 className="mt-5 font-serif text-[2.75rem] leading-[1.03] md:text-6xl lg:text-[4.25rem]">
@@ -68,7 +72,7 @@ export default function HomePage() {
                 It&apos;s a path to generational wealth.
               </span>
             </h1>
-            <p className="mt-6 max-w-xl text-base leading-relaxed text-white/80">
+            <p className="mt-6 text-base leading-relaxed text-white/80">
               Helping individuals, families and investors make smarter real estate
               decisions throughout Greater Phoenix — from a first home to a commercial
               portfolio.
@@ -77,9 +81,6 @@ export default function HomePage() {
               <ButtonLink href="/home-value">What&apos;s My Home Worth?</ButtonLink>
               <ButtonLink href="/listings" variant="light">
                 Browse Listings
-              </ButtonLink>
-              <ButtonLink href="/contact" variant="light">
-                Book a Consultation
               </ButtonLink>
           </div>
         </div>
@@ -211,7 +212,7 @@ export default function HomePage() {
         <div className="grid gap-12 lg:grid-cols-2 lg:items-center">
           <div className="relative aspect-[4/5] w-full">
             <Image
-              src="/kelly/portrait-bridge.jpg"
+              src="/kelly/seated.jpg"
               alt="Kelly Rojas, Phoenix real estate consultant"
               fill
               sizes="(max-width: 1024px) 100vw, 50vw"

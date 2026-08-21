@@ -31,6 +31,8 @@ export function HeroMedia({
   children,
   overlay = "linear-gradient(90deg, rgba(0,0,0,0.85), rgba(0,0,0,0.35))",
   minHeight = "min-h-[600px]",
+  layout = "full",
+  mediaPosition = "center",
 }: {
   poster: string;
   /** One path, or several formats in preference order (WebM before MP4). */
@@ -38,6 +40,14 @@ export function HeroMedia({
   children: ReactNode;
   overlay?: string;
   minHeight?: string;
+  /**
+   * "full" bleeds the media behind the copy — right for wide landscape media.
+   * "split" puts copy on a dark panel beside the media, which is the only way
+   * portrait media (a person) survives a hero without being cropped to a band.
+   */
+  layout?: "full" | "split";
+  /** object-position for the media, e.g. "center 20%" to favor a face. */
+  mediaPosition?: string;
 }) {
   const sources = videoSrc
     ? (Array.isArray(videoSrc) ? videoSrc : [videoSrc]).filter(Boolean)
@@ -81,16 +91,13 @@ export function HeroMedia({
     });
   }, [useVideo]);
 
-  return (
-    <section
-      className={`relative flex ${minHeight} items-center overflow-hidden px-6 py-24 md:px-10 lg:px-16`}
-    >
+  const media = (
+    <>
       <div
         aria-hidden="true"
-        className="absolute inset-0 bg-cover bg-center"
-        style={{ backgroundImage: `url('${poster}')` }}
+        className="absolute inset-0 bg-cover"
+        style={{ backgroundImage: `url('${poster}')`, backgroundPosition: mediaPosition }}
       />
-
       {useVideo && sources.length ? (
         <video
           ref={videoRef}
@@ -101,6 +108,7 @@ export function HeroMedia({
           preload="metadata"
           poster={poster}
           onCanPlay={() => setReady(true)}
+          style={{ objectPosition: mediaPosition }}
           className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-700 ${
             ready ? "opacity-100" : "opacity-0"
           }`}
@@ -110,6 +118,27 @@ export function HeroMedia({
           ))}
         </video>
       ) : null}
+    </>
+  );
+
+  if (layout === "split") {
+    return (
+      <section className={`grid ${minHeight} lg:grid-cols-2`}>
+        <div className="order-1 flex items-center bg-ink px-6 py-20 md:px-10 md:py-24 lg:order-none lg:px-14">
+          <div className="mx-auto w-full max-w-xl lg:mx-0">{children}</div>
+        </div>
+        <div className="relative order-2 min-h-[420px] bg-charcoal lg:order-none lg:min-h-0">
+          {media}
+        </div>
+      </section>
+    );
+  }
+
+  return (
+    <section
+      className={`relative flex ${minHeight} items-center overflow-hidden px-6 py-24 md:px-10 lg:px-16`}
+    >
+      {media}
 
       <div aria-hidden="true" className="absolute inset-0" style={{ background: overlay }} />
 
