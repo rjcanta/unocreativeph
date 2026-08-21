@@ -3,7 +3,6 @@ import Image from "next/image";
 import { ButtonLink, Card, CtaBand, Eyebrow, Section, SectionHeading, StatBand } from "@/components/ui";
 import { HeroMedia } from "@/components/hero-media";
 import { PropertyCard } from "@/components/property-card";
-import { VideoFeature } from "@/components/video-feature";
 import { listings } from "@/data/listings";
 import { neighborhoods } from "@/data/neighborhoods";
 import { site } from "@/data/site";
@@ -88,45 +87,6 @@ export default function HomePage() {
 
       <StatBand stats={site.stats} />
 
-      {/* Quick tools */}
-      <Section className="pb-0">
-        <div className="grid gap-4 md:grid-cols-3">
-          {[
-            {
-              href: "/home-value",
-              eyebrow: "Free · 2 minutes",
-              title: "What's my home worth?",
-              body: "A real valuation from real comparable sales — not an algorithm guessing from a ZIP code.",
-            },
-            {
-              href: "/calculators",
-              eyebrow: "Interactive",
-              title: "Mortgage calculator",
-              body: "Model payment, taxes, insurance and PMI so you know your real monthly number.",
-            },
-            {
-              href: "/neighborhoods",
-              eyebrow: "Local data",
-              title: "Neighborhood guides",
-              body: "Median prices, days on market and honest notes on every submarket I work.",
-            },
-          ].map((tool) => (
-            <Link
-              key={tool.href}
-              href={tool.href}
-              className="group border border-line bg-white p-7 transition-colors hover:border-gold"
-            >
-              <p className="eyebrow text-gold">{tool.eyebrow}</p>
-              <h3 className="mt-3 text-2xl">{tool.title}</h3>
-              <p className="mt-3 text-sm leading-relaxed text-ink-soft">{tool.body}</p>
-              <span className="mt-5 inline-block text-[0.688rem] font-bold uppercase tracking-[0.14em] text-gold">
-                Start now →
-              </span>
-            </Link>
-          ))}
-        </div>
-      </Section>
-
       {/* Services */}
       <Section>
         <SectionHeading
@@ -210,38 +170,6 @@ export default function HomePage() {
           {featured.map((listing) => (
             <PropertyCard key={listing.slug} listing={listing} />
           ))}
-        </div>
-      </Section>
-
-      {/* Walkthrough video */}
-      <Section className="bg-sand">
-        <div className="grid gap-12 lg:grid-cols-[0.85fr_1.15fr] lg:items-center">
-          <VideoFeature
-            src={["/video/walkthrough.webm", "/video/walkthrough.mp4"]}
-            poster="/video/walkthrough-poster.jpg"
-            label="Play Kelly's property walkthrough"
-          />
-          <div>
-            <Eyebrow tone="ink">Walk through with Kelly</Eyebrow>
-            <h2 className="mt-3 text-3xl md:text-[2.75rem]">
-              See a property the way she does.
-            </h2>
-            <p className="mt-5 leading-relaxed text-ink-soft">
-              Kelly walks properties on camera — the layout, the finishes, the things
-              a listing photo flatters and the things it hides. It&apos;s the closest
-              thing to standing in the room before you ever book a showing.
-            </p>
-            <p className="mt-4 leading-relaxed text-ink-soft">
-              Out of state? These walkthroughs are how most of her relocating clients
-              build a shortlist before they fly in.
-            </p>
-            <div className="mt-8 flex flex-wrap gap-3">
-              <ButtonLink href="/contact">Request a private walkthrough</ButtonLink>
-              <ButtonLink href="/listings" variant="outline">
-                Browse listings
-              </ButtonLink>
-            </div>
-          </div>
         </div>
       </Section>
 
