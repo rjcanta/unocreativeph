@@ -246,7 +246,7 @@ export default function HomePage() {
         <div className="grid gap-12 lg:grid-cols-2 lg:items-center">
           <div className="relative aspect-[4/5] w-full">
             <Image
-              src="https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?auto=format&fit=crop&w=1000&q=85"
+              src="/kelly/portrait-bridge.jpg"
               alt="Kelly Rojas, Phoenix real estate consultant"
               fill
               sizes="(max-width: 1024px) 100vw, 50vw"

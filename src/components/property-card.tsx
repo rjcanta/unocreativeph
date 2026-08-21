@@ -1,9 +1,14 @@
 import Image from "next/image";
 import Link from "next/link";
-import { formatNumber, formatPrice, type Listing } from "@/data/listings";
+import {
+  formatListingPrice,
+  formatNumber,
+  type Listing,
+} from "@/data/listings";
 
 const statusStyles: Record<Listing["status"], string> = {
   "For Sale": "bg-gold text-white",
+  "For Lease": "bg-charcoal text-white",
   Pending: "bg-ink text-white",
   Sold: "bg-white text-ink border border-line",
   "Coming Soon": "bg-ink-soft text-white",
@@ -35,7 +40,7 @@ export function PropertyCard({ listing }: { listing: Listing }) {
         </p>
         <h3 className="mt-2 text-xl">{listing.title}</h3>
         <p className="mt-1 text-sm text-ink-soft">{listing.address}</p>
-        <p className="mt-3 font-serif text-2xl">{formatPrice(listing.price)}</p>
+        <p className="mt-3 font-serif text-2xl">{formatListingPrice(listing)}</p>
         <p className="mt-auto pt-4 text-xs text-ink-soft">
           {listing.beds > 0 ? `${listing.beds} bd · ${listing.baths} ba · ` : ""}
           {listing.sqft > 0

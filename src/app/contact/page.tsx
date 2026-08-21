@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import { LeadForm } from "@/components/lead-form";
 import { Eyebrow, PageHero, Section } from "@/components/ui";
@@ -89,6 +90,16 @@ export default function ContactPage() {
           </div>
 
           <aside className="space-y-4 lg:sticky lg:top-28">
+            <div className="relative aspect-[4/5] w-full">
+              <Image
+                src="/kelly/seated.jpg"
+                alt="Kelly Rojas"
+                fill
+                sizes="(max-width: 1024px) 100vw, 33vw"
+                className="object-cover"
+              />
+            </div>
+
             <div className="bg-ink p-7 text-white">
               <p className="eyebrow text-gold-light">Direct contact</p>
               <a

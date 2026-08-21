@@ -15,6 +15,7 @@ const types: (ListingType | "All")[] = [
 const statuses: (ListingStatus | "All")[] = [
   "All",
   "For Sale",
+  "For Lease",
   "Pending",
   "Sold",
 ];

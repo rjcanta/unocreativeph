@@ -6,7 +6,13 @@ import { LeadForm } from "@/components/lead-form";
 import { PropertyCard } from "@/components/property-card";
 import { MortgageCalculator } from "@/components/mortgage-calculator";
 import { ButtonLink, Eyebrow, Section, SectionHeading } from "@/components/ui";
-import { formatNumber, formatPrice, getListing, listings } from "@/data/listings";
+import {
+  formatListingPrice,
+  formatNumber,
+  formatPrice,
+  getListing,
+  listings,
+} from "@/data/listings";
 import { site } from "@/data/site";
 
 export function generateStaticParams() {
@@ -26,7 +32,7 @@ export async function generateMetadata({
     title: `${listing.title} — ${listing.city}, AZ`,
     description: listing.summary,
     openGraph: {
-      title: `${listing.title} — ${formatPrice(listing.price)}`,
+      title: `${listing.title} — ${formatListingPrice(listing)}`,
       description: listing.summary,
       images: [listing.image],
     },
@@ -58,7 +64,14 @@ export default async function ListingPage({
     ...(listing.sqft > 0
       ? [
           { label: "Interior", value: `${formatNumber(listing.sqft)} sqft` },
-          { label: "Price / sqft", value: formatPrice(Math.round(listing.price / listing.sqft)) },
+          ...(listing.priceUnit === "total"
+            ? [
+                {
+                  label: "Price / sqft",
+                  value: formatPrice(Math.round(listing.price / listing.sqft)),
+                },
+              ]
+            : []),
         ]
       : []),
     ...(listing.lotSqft > 0
@@ -132,7 +145,7 @@ export default async function ListingPage({
             <h1 className="mt-3 font-serif text-4xl md:text-5xl">{listing.title}</h1>
             <p className="mt-2 text-lg text-ink-soft">{listing.address}</p>
             <p className="mt-5 font-serif text-4xl text-gold">
-              {formatPrice(listing.price)}
+              {formatListingPrice(listing)}
             </p>
 
             {listing.summary ? (
@@ -193,7 +206,7 @@ export default async function ListingPage({
                     listing: listing.title,
                     address: `${listing.address}, ${listing.city}`,
                     mlsId: listing.mlsId,
-                    price: formatPrice(listing.price),
+                    price: formatListingPrice(listing),
                   }}
                   extraFields={[
                     {
@@ -223,7 +236,7 @@ export default async function ListingPage({
         </div>
       </Section>
 
-      {listing.type === "Residential" ? (
+      {listing.type === "Residential" && listing.priceUnit === "total" ? (
         <Section className="bg-sand">
           <SectionHeading
             eyebrow="Run the numbers"

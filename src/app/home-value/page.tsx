@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import { ValuationWizard } from "@/components/valuation-wizard";
 import { Faq } from "@/components/faq";
 import { ButtonLink, Eyebrow, PageHero, Section, SectionHeading } from "@/components/ui";
@@ -101,6 +102,16 @@ export default function HomeValuePage() {
                   </li>
                 ))}
               </ul>
+            </div>
+
+            <div className="relative aspect-[4/5] w-full">
+              <Image
+                src="/kelly/lounge.jpg"
+                alt="Kelly Rojas"
+                fill
+                sizes="(max-width: 1024px) 100vw, 33vw"
+                className="object-cover"
+              />
             </div>
 
             <div className="bg-ink p-6 text-white">

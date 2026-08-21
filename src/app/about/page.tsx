@@ -71,8 +71,8 @@ export default function AboutPage() {
         <div className="grid gap-12 lg:grid-cols-[0.95fr_1.05fr] lg:items-center">
           <div className="relative aspect-[4/5] w-full">
             <Image
-              src="https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?auto=format&fit=crop&w=1000&q=85"
-              alt="Kelly Rojas"
+              src="/kelly/headshot.jpg"
+              alt="Kelly Rojas, Phoenix residential and commercial real estate consultant"
               fill
               priority
               sizes="(max-width: 1024px) 100vw, 45vw"
