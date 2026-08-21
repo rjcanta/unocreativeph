@@ -45,7 +45,8 @@ const services = [
  * see docs/HERO-VIDEO.md for encoding settings and what makes a good clip.
  * The poster is what everyone sees first, and all that phones ever see.
  */
-const heroPoster = "/kelly/portrait-bridge.jpg";
+const heroPoster = "/kelly/hero-wide.jpg";
+const heroPosterMobile = "/kelly/hero-portrait.jpg";
 // Set this to your video path(s) to switch the hero to video, e.g.
 //   ["/hero/hero.webm", "/hero/hero.mp4"]
 // See docs/HERO-VIDEO.md. Leave undefined to keep the poster image.
@@ -59,14 +60,15 @@ export default function HomePage() {
       {/* Hero — drops in a video automatically once one exists at the path in
           heroVideo below. Until then the poster image carries it. */}
       <HeroMedia
-        layout="split"
         poster={heroPoster}
+        posterMobile={heroPosterMobile}
         videoSrc={heroVideo}
-        mediaPosition="center 22%"
+        overlay="linear-gradient(90deg, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.78) 32%, rgba(0,0,0,0.3) 62%, rgba(0,0,0,0.12) 100%)"
+        overlayMobile="linear-gradient(180deg, rgba(0,0,0,0.82) 0%, rgba(0,0,0,0.62) 45%, rgba(0,0,0,0.45) 100%)"
       >
         <div className="max-w-2xl text-white">
           <Eyebrow>Residential · Commercial · Investment</Eyebrow>
-            <h1 className="mt-5 font-serif text-[2.75rem] leading-[1.03] md:text-6xl lg:text-[4.25rem]">
+            <h1 className="mt-4 font-serif text-[2.15rem] leading-[1.08] md:mt-5 md:text-5xl md:leading-[1.03] lg:text-[4rem]">
               Real estate is more than a transaction.
               <span className="mt-2 block text-gold-light">
                 It&apos;s a path to generational wealth.

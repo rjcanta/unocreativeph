@@ -29,12 +29,19 @@ export function HeroMedia({
   poster,
   videoSrc,
   children,
+  posterMobile,
   overlay = "linear-gradient(90deg, rgba(0,0,0,0.85), rgba(0,0,0,0.35))",
+  overlayMobile = "linear-gradient(180deg, rgba(0,0,0,0.78), rgba(0,0,0,0.55))",
   minHeight = "min-h-[600px]",
   layout = "full",
   mediaPosition = "center",
 }: {
   poster: string;
+  /**
+   * Optional small-screen art direction. A wide hero crop becomes a useless
+   * sliver on a phone, so supply a taller crop of the same shot.
+   */
+  posterMobile?: string;
   /** One path, or several formats in preference order (WebM before MP4). */
   videoSrc?: string | string[];
   children: ReactNode;
@@ -48,6 +55,7 @@ export function HeroMedia({
   layout?: "full" | "split";
   /** object-position for the media, e.g. "center 20%" to favor a face. */
   mediaPosition?: string;
+  overlayMobile?: string;
 }) {
   const sources = videoSrc
     ? (Array.isArray(videoSrc) ? videoSrc : [videoSrc]).filter(Boolean)
@@ -95,9 +103,16 @@ export function HeroMedia({
     <>
       <div
         aria-hidden="true"
-        className="absolute inset-0 bg-cover"
+        className={`absolute inset-0 bg-cover ${posterMobile ? "hidden md:block" : ""}`}
         style={{ backgroundImage: `url('${poster}')`, backgroundPosition: mediaPosition }}
       />
+      {posterMobile ? (
+        <div
+          aria-hidden="true"
+          className="absolute inset-0 bg-cover bg-center md:hidden"
+          style={{ backgroundImage: `url('${posterMobile}')` }}
+        />
+      ) : null}
       {useVideo && sources.length ? (
         <video
           ref={videoRef}
@@ -136,11 +151,22 @@ export function HeroMedia({
 
   return (
     <section
-      className={`relative flex ${minHeight} items-center overflow-hidden px-6 py-24 md:px-10 lg:px-16`}
+      className={`relative flex ${minHeight} items-end overflow-hidden px-6 pb-14 pt-28 md:items-center md:px-10 md:py-24 lg:px-16`}
     >
       {media}
 
-      <div aria-hidden="true" className="absolute inset-0" style={{ background: overlay }} />
+      <div
+        aria-hidden="true"
+        className={posterMobile ? "absolute inset-0 hidden md:block" : "absolute inset-0"}
+        style={{ background: overlay }}
+      />
+      {posterMobile ? (
+        <div
+          aria-hidden="true"
+          className="absolute inset-0 md:hidden"
+          style={{ background: overlayMobile }}
+        />
+      ) : null}
 
       <div className="relative mx-auto w-full max-w-6xl">{children}</div>
     </section>
