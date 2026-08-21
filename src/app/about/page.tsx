@@ -8,6 +8,7 @@ import {
   SectionHeading,
   StatBand,
 } from "@/components/ui";
+import { RecentTransactions } from "@/components/recent-transactions";
 import { site } from "@/data/site";
 
 export const metadata: Metadata = {
@@ -132,6 +133,15 @@ export default function AboutPage() {
             </div>
           ))}
         </div>
+      </Section>
+
+      <Section className="bg-sand">
+        <SectionHeading
+          eyebrow="Track record"
+          title="Recently closed"
+          intro="A sample of recent transactions. Buyer-side representation is labeled as such — the work of finding the right property and negotiating for it is different from listing one."
+        />
+        <RecentTransactions />
       </Section>
 
       <Section className="bg-charcoal text-white">

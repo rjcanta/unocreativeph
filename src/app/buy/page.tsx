@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { LeadForm } from "@/components/lead-form";
 import { Faq } from "@/components/faq";
 import { ProcessSteps } from "@/components/process-steps";
+import { RecentTransactions } from "@/components/recent-transactions";
 import {
   ButtonLink,
   Card,
@@ -121,6 +122,15 @@ export default function BuyPage() {
 
       <Section className="bg-sand">
         <SectionHeading
+          eyebrow="Recently closed"
+          title="Buyers I've represented"
+          intro="Recent purchases closed on the buyer's side, from a multigenerational property in west Phoenix to a corner lot in Flagstaff."
+        />
+        <RecentTransactions />
+      </Section>
+
+      <Section>
+        <SectionHeading
           eyebrow="The process"
           title="What buying with me looks like"
           align="left"
@@ -129,7 +139,7 @@ export default function BuyPage() {
         <ProcessSteps steps={steps} />
       </Section>
 
-      <Section id="start">
+      <Section id="start" className="bg-sand">
         <div className="grid gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:items-start">
           <div className="lg:sticky lg:top-28">
             <Eyebrow tone="ink">Get started</Eyebrow>
@@ -210,7 +220,7 @@ export default function BuyPage() {
         </div>
       </Section>
 
-      <Section className="bg-sand">
+      <Section>
         <SectionHeading eyebrow="Buyer questions" title="What people ask me" align="left" />
         <Faq items={faqs} />
       </Section>
