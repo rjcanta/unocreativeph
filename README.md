@@ -61,7 +61,7 @@ All are optional; the site builds and runs without them. See `.env.example`.
 
 | Variable | Purpose |
 | --- | --- |
-| `NEXT_PUBLIC_SITE_URL` | Public URL used for canonical tags, Open Graph and the sitemap. Set this to the live domain. |
+| `NEXT_PUBLIC_SITE_URL` | Public URL used for canonical tags, Open Graph and the sitemap. Set this to the live domain, written in full: `https://unocreativeph.vercel.app`. If it is unset or not a valid URL, the site falls back to Vercel's own deployment URL and then to the default domain — an invalid value logs a warning but never fails the build. |
 | `LEAD_WEBHOOK_URL` | Every form submission is POSTed here as JSON. Point it at Zapier, Make, n8n, a CRM endpoint or a Slack incoming webhook. |
 | `LEAD_NOTIFY_EMAIL` | Included in the webhook payload as the intended recipient. |
 

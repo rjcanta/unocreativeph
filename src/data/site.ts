@@ -1,3 +1,32 @@
+const FALLBACK_URL = "https://kellyrojas.com";
+
+/**
+ * Resolves the public site URL, tolerating a malformed or unset
+ * NEXT_PUBLIC_SITE_URL rather than failing the production build. Falls back to
+ * the deployment URL Vercel provides automatically, then to FALLBACK_URL.
+ */
+function resolveSiteUrl(): string {
+  const candidates = [
+    process.env.NEXT_PUBLIC_SITE_URL,
+    process.env.NEXT_PUBLIC_VERCEL_URL
+      ? `https://${process.env.NEXT_PUBLIC_VERCEL_URL}`
+      : undefined,
+  ];
+
+  for (const candidate of candidates) {
+    const value = candidate?.trim();
+    if (!value) continue;
+    const withProtocol = /^https?:\/\//i.test(value) ? value : `https://${value}`;
+    try {
+      return new URL(withProtocol).origin;
+    } catch {
+      console.warn(`[site] ignoring invalid site URL: ${JSON.stringify(value)}`);
+    }
+  }
+
+  return FALLBACK_URL;
+}
+
 export const site = {
   name: "Kelly Rojas",
   brokerage: "Arizona International Real Estate",
@@ -7,7 +36,7 @@ export const site = {
   phoneHref: "tel:+16025550142",
   email: "kelly@arizonainternationalrealestate.com",
   license: "AZ License #SA123456000",
-  url: process.env.NEXT_PUBLIC_SITE_URL ?? "https://kellyrojas.com",
+  url: resolveSiteUrl(),
   social: {
     instagram: "https://instagram.com/",
     linkedin: "https://linkedin.com/",
