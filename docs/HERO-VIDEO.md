@@ -85,3 +85,23 @@ Video heroes are more often a downgrade than an upgrade. They cost load time
 and attention, and a mediocre clip reads as less professional than a strong
 photograph. Use one only if the footage is genuinely good. The infrastructure
 is here either way — turning it off is deleting one line.
+
+
+---
+
+## Vertical (Reel / TikTok) footage
+
+Phone-shot vertical video **cannot** be used as a hero background. Filling a
+1440x600 hero with a 480x854 portrait clip means scaling it 3x — visibly
+blurry — and cropping away 77% of the frame, usually decapitating whoever is
+on screen. Footage of someone talking is worse still, since a hero is muted by
+definition and reads as a broken video.
+
+Vertical footage belongs in `VideoFeature` instead
+(`src/components/video-feature.tsx`), which presents it at its natural 9:16
+with a poster, a play button and sound on click — the way that content is
+meant to be watched. The home page "Walk through with Kelly" section is an
+example.
+
+For the hero, shoot or license **landscape** footage: 16:9, at least 1920px
+wide, slow continuous motion, no speaking.
