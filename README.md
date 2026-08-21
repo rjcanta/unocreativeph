@@ -91,7 +91,10 @@ Everything below is placeholder and should be replaced before launch:
   client's headshot and real listing photography. Put local files in `public/` and
   update the paths; remove the `images.unsplash.com` entry from `next.config.ts` once
   no remote images remain.
-- **`src/data/listings.ts`** — demo inventory. See below for connecting a live feed.
+- **`src/data/listings.ts`** — demo inventory with invented addresses and MLS numbers.
+  **See [docs/ADDING-LISTINGS.md](docs/ADDING-LISTINGS.md) for how to add Kelly's real
+  listings by hand** (only seven fields are required per listing), or below for
+  connecting a live feed.
 - **`src/data/neighborhoods.ts`** — market figures are illustrative. Refresh from
   current ARMLS data.
 - **Testimonials** in `src/app/about/page.tsx` and the career timeline are placeholders.

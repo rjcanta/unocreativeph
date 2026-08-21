@@ -70,7 +70,7 @@ export default async function ListingPage({
     ...(listing.hoa !== null
       ? [{ label: "HOA", value: `${formatPrice(listing.hoa)} / mo` }]
       : []),
-    { label: "MLS #", value: listing.mlsId },
+    ...(listing.mlsId ? [{ label: "MLS #", value: listing.mlsId }] : []),
   ];
 
   return (
@@ -83,9 +83,15 @@ export default async function ListingPage({
         </div>
       </div>
 
-      {/* Gallery */}
-      <section className="grid gap-1 bg-white md:grid-cols-3">
-        <div className="relative aspect-[16/10] md:col-span-2 md:aspect-auto md:min-h-[460px]">
+      {/* Gallery — a single photo spans the full width; extras stack beside it. */}
+      <section
+        className={`grid gap-1 bg-white ${listing.gallery.length > 1 ? "md:grid-cols-3" : ""}`}
+      >
+        <div
+          className={`relative aspect-[16/10] md:aspect-auto md:min-h-[460px] ${
+            listing.gallery.length > 1 ? "md:col-span-2" : ""
+          }`}
+        >
           <Image
             src={listing.gallery[0]}
             alt={listing.title}
@@ -95,7 +101,7 @@ export default async function ListingPage({
             className="object-cover"
           />
         </div>
-        <div className="grid gap-1">
+        <div className={listing.gallery.length > 1 ? "grid gap-1" : "hidden"}>
           {listing.gallery.slice(1, 3).map((src, index) => (
             <div key={src} className="relative aspect-[16/9] md:min-h-[229px]">
               <Image
@@ -107,7 +113,7 @@ export default async function ListingPage({
               />
             </div>
           ))}
-          {listing.gallery.length < 3 ? (
+          {listing.gallery.length === 2 ? (
             <div className="flex min-h-[229px] items-center justify-center bg-sand p-8 text-center">
               <p className="text-sm text-ink-soft">
                 Additional photography available on request.
@@ -129,7 +135,9 @@ export default async function ListingPage({
               {formatPrice(listing.price)}
             </p>
 
-            <p className="mt-7 text-lg leading-relaxed">{listing.summary}</p>
+            {listing.summary ? (
+              <p className="mt-7 text-lg leading-relaxed">{listing.summary}</p>
+            ) : null}
 
             <div className="mt-8 space-y-4 leading-relaxed text-ink-soft">
               {listing.description.map((paragraph) => (
@@ -151,7 +159,7 @@ export default async function ListingPage({
               </dl>
             </div>
 
-            <div className="mt-10">
+            <div className={listing.features.length ? "mt-10" : "hidden"}>
               <h2 className="text-2xl">Features</h2>
               <ul className="mt-5 grid gap-3 sm:grid-cols-2">
                 {listing.features.map((feature) => (

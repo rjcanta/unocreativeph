@@ -1,6 +1,7 @@
 export type ListingStatus = "For Sale" | "Pending" | "Sold" | "Coming Soon";
 export type ListingType = "Residential" | "Commercial" | "Investment" | "Land";
 
+/** The normalized shape every component consumes. Built by normalizeListing(). */
 export type Listing = {
   slug: string;
   title: string;
@@ -27,10 +28,102 @@ export type Listing = {
 };
 
 /**
- * Demo inventory. Replace with a live MLS/IDX feed when the client's
- * board approval comes through — see README, "Connecting a live MLS feed".
+ * What you actually write when adding a listing by hand. Only seven fields are
+ * required; everything else falls back to a sensible default and is simply
+ * omitted from the page when absent. See docs/ADDING-LISTINGS.md.
  */
-export const listings: Listing[] = [
+export type ListingInput = {
+  /** URL segment, lowercase with hyphens: /listings/<slug> */
+  slug: string;
+  title: string;
+  address: string;
+  city: string;
+  price: number;
+  status: ListingStatus;
+  type: ListingType;
+
+  state?: string;
+  zip?: string;
+  beds?: number;
+  baths?: number;
+  sqft?: number;
+  lotSqft?: number;
+  yearBuilt?: number;
+  hoa?: number | null;
+  mlsId?: string;
+  /** Main photo. Defaults to the first gallery image, then a placeholder. */
+  image?: string;
+  gallery?: string[];
+  /** One-line description shown on the card and at the top of the page. */
+  summary?: string;
+  /** Full description. A single string is treated as one paragraph. */
+  description?: string | string[];
+  features?: string[];
+  /** Show on the home page (it displays the first four). */
+  featured?: boolean;
+};
+
+const PLACEHOLDER_IMAGE = "/listing-placeholder.svg";
+
+/** Fills in defaults so a hand-written listing needs only the essentials. */
+export function normalizeListing(input: ListingInput): Listing {
+  const gallery = input.gallery?.filter(Boolean) ?? [];
+  const image = input.image ?? gallery[0] ?? PLACEHOLDER_IMAGE;
+  const description =
+    typeof input.description === "string"
+      ? [input.description]
+      : (input.description ?? []);
+
+  return {
+    ...input,
+    state: input.state ?? "AZ",
+    zip: input.zip ?? "",
+    beds: input.beds ?? 0,
+    baths: input.baths ?? 0,
+    sqft: input.sqft ?? 0,
+    lotSqft: input.lotSqft ?? 0,
+    yearBuilt: input.yearBuilt ?? 0,
+    hoa: input.hoa ?? null,
+    mlsId: input.mlsId ?? "",
+    image,
+    gallery: gallery.length ? gallery : [image],
+    summary: input.summary ?? "",
+    description,
+    features: input.features ?? [],
+    featured: input.featured ?? false,
+  };
+}
+/* ---------------------------------------------------------------------------
+ * INVENTORY
+ *
+ * To add a listing, copy this template into the array below. Only the first
+ * seven fields are required. Full walkthrough: docs/ADDING-LISTINGS.md
+ *
+ *   {
+ *     slug: "1234-e-main-st-phoenix",
+ *     title: "Renovated Arcadia Ranch",
+ *     address: "1234 E Main St",
+ *     city: "Phoenix",
+ *     price: 750000,
+ *     status: "For Sale",          // For Sale | Pending | Sold | Coming Soon
+ *     type: "Residential",         // Residential | Commercial | Investment | Land
+ *     zip: "85018",
+ *     beds: 4,
+ *     baths: 3,
+ *     sqft: 2400,
+ *     yearBuilt: 1962,
+ *     mlsId: "6712345",
+ *     gallery: ["/listings/1234-e-main-st/front.jpg"],
+ *     summary: "One line that appears on the card and at the top of the page.",
+ *     description: "A paragraph, or an array of paragraphs.",
+ *     features: ["Pool", "No HOA", "RV gate"],
+ *     featured: true,              // show on the home page
+ *   },
+ *
+ * The entries below are PLACEHOLDER DEMO DATA with invented addresses and MLS
+ * numbers. Delete them once Kelly's real listings are in.
+ * ------------------------------------------------------------------------- */
+const inventory: ListingInput[] = [
   {
     slug: "modern-desert-residence-scottsdale",
     title: "Modern Desert Residence",
@@ -341,6 +434,8 @@ export const listings: Listing[] = [
     featured: false,
   },
 ];
+
+export const listings: Listing[] = inventory.map(normalizeListing);
 
 export function getListing(slug: string) {
   return listings.find((l) => l.slug === slug);
