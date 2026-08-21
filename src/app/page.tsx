@@ -1,6 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { ButtonLink, Card, CtaBand, Eyebrow, Section, SectionHeading, StatBand } from "@/components/ui";
+import { HeroMedia } from "@/components/hero-media";
 import { PropertyCard } from "@/components/property-card";
 import { listings } from "@/data/listings";
 import { neighborhoods } from "@/data/neighborhoods";
@@ -39,24 +40,28 @@ const services = [
   },
 ];
 
+/**
+ * Hero media. Drop an MP4 at public/hero/hero.mp4 and this picks it up —
+ * see docs/HERO-VIDEO.md for encoding settings and what makes a good clip.
+ * The poster is what everyone sees first, and all that phones ever see.
+ */
+const heroPoster =
+  "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=1800&q=85";
+// Set this to your video path(s) to switch the hero to video, e.g.
+//   ["/hero/hero.webm", "/hero/hero.mp4"]
+// See docs/HERO-VIDEO.md. Leave undefined to keep the poster image.
+const heroVideo: string | string[] | undefined = undefined;
+
 export default function HomePage() {
   const featured = listings.filter((l) => l.featured).slice(0, 4);
 
   return (
     <>
-      {/* Hero */}
-      <section
-        className="relative flex min-h-[600px] items-center px-6 py-24 md:px-10 lg:px-16"
-        style={{
-          backgroundImage:
-            "linear-gradient(90deg, rgba(0,0,0,0.85), rgba(0,0,0,0.35)), url('https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=1800&q=85')",
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-        }}
-      >
-        <div className="mx-auto w-full max-w-6xl">
-          <div className="max-w-2xl text-white">
-            <Eyebrow>Residential · Commercial · Investment</Eyebrow>
+      {/* Hero — drops in a video automatically once one exists at the path in
+          heroVideo below. Until then the poster image carries it. */}
+      <HeroMedia poster={heroPoster} videoSrc={heroVideo}>
+        <div className="max-w-2xl text-white">
+          <Eyebrow>Residential · Commercial · Investment</Eyebrow>
             <h1 className="mt-5 font-serif text-[2.75rem] leading-[1.03] md:text-6xl lg:text-[4.25rem]">
               Real estate is more than a transaction.
               <span className="mt-2 block text-gold-light">
@@ -76,10 +81,9 @@ export default function HomePage() {
               <ButtonLink href="/contact" variant="light">
                 Book a Consultation
               </ButtonLink>
-            </div>
           </div>
         </div>
-      </section>
+      </HeroMedia>
 
       <StatBand stats={site.stats} />
 

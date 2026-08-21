@@ -37,6 +37,9 @@ Plus `/sitemap.xml`, `/robots.txt` and a custom 404.
 - **Lead form** (`src/components/lead-form.tsx`) — one reusable form driving buyer,
   seller, commercial, investor, contact and listing-inquiry submissions.
 - FAQ accordions, a mobile navigation drawer, and honeypot spam protection on every form.
+- **Hero video support** (`src/components/hero-media.tsx`) — off by default; the hero
+  upgrades from poster image to video only on capable viewports, and honors reduced
+  motion and Save-Data. See [docs/HERO-VIDEO.md](docs/HERO-VIDEO.md).
 
 ## Getting started
 
