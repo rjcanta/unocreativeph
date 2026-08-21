@@ -18,6 +18,7 @@ export type Transaction = {
   sqft?: number;
   yearBuilt?: number;
   mlsId?: string;
+  image?: string;
   /** One line on what made the deal worth showing. */
   note: string;
 };
@@ -35,6 +36,7 @@ export const transactions: Transaction[] = [
     sqft: 1691,
     yearBuilt: 1961,
     mlsId: "7046679",
+    image: "/transactions/3554-w-townley-ave.jpg",
     note: "A remodeled three-bedroom main house plus an attached one-bedroom casita with its own entrance, bath and laundry — bought for a family who needed multigenerational space on a single lot.",
   },
   {
@@ -49,6 +51,7 @@ export const transactions: Transaction[] = [
     sqft: 1120,
     yearBuilt: 1991,
     mlsId: "7035266",
+    image: "/transactions/2029-n-west-st.jpg",
     note: "A corner-lot home in Sunnyside Farms with an open floor plan and side-gate access — representation two hours north of the metro, in a market with very different inventory dynamics.",
   },
 ];

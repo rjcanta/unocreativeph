@@ -149,6 +149,7 @@ const inventory: ListingInput[] = [
     lotSqft: 9287,
     yearBuilt: 1950,
     mlsId: "7037969",
+    gallery: ["/listings/2238-e-mulberry-dr/main.jpg"],
     summary:
       "Fully remodeled single-level mid-century ranch in the Camelback Corridor, available for lease at $2,600 a month.",
     description: [
@@ -179,6 +180,7 @@ const inventory: ListingInput[] = [
     type: "Land",
     lotSqft: 43962,
     mlsId: "6930979",
+    gallery: ["/listings/6801-n-59th-ave/aerial.jpg"],
     summary:
       "Two adjoining C-2 General Commercial parcels totaling roughly one acre on a high-traffic corner in downtown Glendale.",
     description: [

@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { formatNumber, formatPrice } from "@/data/listings";
 import { sideLabels, transactions, type Transaction } from "@/data/transactions";
 
@@ -13,8 +14,21 @@ export function RecentTransactions({
       {items.map((deal) => (
         <article
           key={deal.mlsId ?? deal.address}
-          className="flex flex-col border border-line bg-white p-7"
+          className="flex flex-col overflow-hidden border border-line bg-white"
         >
+          {deal.image ? (
+            <div className="relative aspect-[16/10] w-full">
+              <Image
+                src={deal.image}
+                alt={`${deal.address}, ${deal.city}`}
+                fill
+                sizes="(max-width: 768px) 100vw, 50vw"
+                className="object-cover"
+              />
+            </div>
+          ) : null}
+
+          <div className="flex flex-1 flex-col p-7">
           <div className="flex flex-wrap items-center gap-3">
             <span className="bg-ink px-3 py-1.5 text-[0.625rem] font-bold uppercase tracking-[0.12em] text-white">
               Closed
@@ -43,6 +57,7 @@ export function RecentTransactions({
           <p className="mt-5 text-[0.938rem] leading-relaxed text-ink-soft">
             {deal.note}
           </p>
+          </div>
         </article>
       ))}
     </div>
