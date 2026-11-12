@@ -1,0 +1,559 @@
+// Realtor Growth OS — Module 01 data model.
+//
+// Conventions
+// - Every tenant-owned row carries workspaceId; services always filter on it.
+// - "Enum" columns are strings validated in TypeScript (src/lib/domain/types.ts)
+//   so the schema ports cleanly from SQLite to PostgreSQL.
+// - JSON payloads are stored as TEXT and validated with zod on read.
+// - Soft deletion via deletedAt where records are user-facing.
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model Workspace {
+  id                 String   @id @default(cuid())
+  name               String
+  slug               String   @unique
+  timezone           String   @default("America/Phoenix") // IANA
+  marketRegion       String   @default("US-AZ")
+  isDemo             Boolean  @default(false)
+  // Global kill switch: when true nothing is delivered, even simulated.
+  sendingPaused      Boolean  @default(false)
+  // Workspace-level opt-in to live delivery. Off by default, ignored in demo.
+  liveSendingEnabled Boolean  @default(false)
+  brandVoiceJson     String   @default("{}")
+  complianceJson     String   @default("{}")
+  schedulingJson     String   @default("{}")
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  users              User[]
+  contacts           Contact[]
+  tags               Tag[]
+  campaigns          Campaign[]
+  campaignTemplates  CampaignTemplate[]
+  scheduledMessages  ScheduledMessage[]
+  communication      CommunicationEvent[]
+  insights           AiInsight[]
+  tasks              AgentTask[]
+  opportunities      Opportunity[]
+  jobs               AutomationJob[]
+  integrations       Integration[]
+  syncLogs           IntegrationSyncLog[]
+  auditLogs          AuditLog[]
+  consentRecords     ContactConsentRecord[]
+  notes              ContactNote[]
+  milestones         ContactMilestone[]
+  relationships      ContactRelationship[]
+  preferences        ContactPreference[]
+  recipients         CampaignRecipient[]
+  mappings           IntegrationMapping[]
+  contactTags        ContactTag[]
+}
+
+model User {
+  id          String    @id @default(cuid())
+  workspaceId String
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  email       String
+  name        String
+  role        String    @default("AGENT") // OWNER | AGENT | ASSISTANT
+  title       String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
+
+  assignedContacts Contact[]   @relation("AssignedAgent")
+  tasks            AgentTask[] @relation("TaskAssignee")
+
+  @@unique([workspaceId, email])
+}
+
+model Contact {
+  id                    String    @id @default(cuid())
+  workspaceId           String
+  workspace             Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  firstName             String
+  lastName              String    @default("")
+  email                 String?
+  emailNormalized       String?
+  phone                 String?
+  phoneNormalized       String?
+  contactType           String // PAST_CLIENT | SPHERE
+  clientRole            String? // BUYER | SELLER | BUYER_SELLER (past clients)
+  tier                  String    @default("STANDARD") // VIP | ACTIVE | STANDARD | NEEDS_RECONNECTION
+  birthdayMonth         Int?
+  birthdayDay           Int?
+  birthdayYear          Int? // optional — greetings never need it
+  birthdayVerified      Boolean   @default(false)
+  closingDate           DateTime?
+  closingDateVerified   Boolean   @default(false)
+  relationshipStartDate DateTime?
+  propertyAddress       String?
+  neighborhood          String?
+  city                  String?
+  lastCommunicationAt   DateTime?
+  preferredChannel      String    @default("EMAIL") // EMAIL | SMS | PHONE | NONE
+  doNotContact          Boolean   @default(false)
+  unsubscribedAt        DateTime?
+  opportunityStatus     String    @default("NONE") // NONE | WATCH | POTENTIAL | ACTIVE | CLOSED
+  assignedAgentId       String?
+  assignedAgent         User?     @relation("AssignedAgent", fields: [assignedAgentId], references: [id], onDelete: SetNull)
+  source                String    @default("MANUAL") // MANUAL | CSV | CRM | SEED
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+  deletedAt             DateTime?
+
+  preference     ContactPreference?
+  consentRecords ContactConsentRecord[]
+  notes          ContactNote[]
+  milestones     ContactMilestone[]
+  relationships  ContactRelationship[] @relation("FromContact")
+  relatedTo      ContactRelationship[] @relation("ToContact")
+  tags           ContactTag[]
+  recipients     CampaignRecipient[]
+  messages       ScheduledMessage[]
+  communication  CommunicationEvent[]
+  insights       AiInsight[]
+  tasks          AgentTask[]
+  opportunities  Opportunity[]
+  mappings       IntegrationMapping[]
+
+  @@unique([workspaceId, emailNormalized])
+  @@index([workspaceId, contactType])
+  @@index([workspaceId, tier])
+  @@index([workspaceId, phoneNormalized])
+  @@index([workspaceId, deletedAt])
+}
+
+model ContactRelationship {
+  id               String    @id @default(cuid())
+  workspaceId      String
+  workspace        Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  contactId        String
+  contact          Contact   @relation("FromContact", fields: [contactId], references: [id], onDelete: Cascade)
+  relatedContactId String
+  relatedContact   Contact   @relation("ToContact", fields: [relatedContactId], references: [id], onDelete: Cascade)
+  relationshipType String // SPOUSE | FAMILY | FRIEND | NEIGHBOR | COWORKER | REFERRED_BY
+  notes            String?
+  createdAt        DateTime  @default(now())
+
+  @@unique([contactId, relatedContactId, relationshipType])
+  @@index([workspaceId])
+}
+
+model ContactPreference {
+  id                 String    @id @default(cuid())
+  workspaceId        String
+  workspace          Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  contactId          String    @unique
+  contact            Contact   @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  receiveNewsletters Boolean   @default(true)
+  receiveSeasonal    Boolean   @default(true)
+  receiveMilestones  Boolean   @default(true)
+  frequency          String    @default("NORMAL") // NORMAL | REDUCED | MILESTONES_ONLY
+  notes              String?
+  updatedAt          DateTime  @updatedAt
+}
+
+// Append-only. The latest record per (contact, channel, purpose) is authoritative.
+model ContactConsentRecord {
+  id          String    @id @default(cuid())
+  workspaceId String
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  contactId   String
+  contact     Contact   @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  channel     String // EMAIL | SMS | PHONE
+  purpose     String    @default("MARKETING") // MARKETING | RELATIONSHIP
+  status      String // GRANTED | REVOKED | UNKNOWN
+  source      String // e.g. "Closing paperwork opt-in", "Reply: unsubscribe"
+  evidence    String?
+  capturedAt  DateTime
+  capturedBy  String? // user id, "system", or integration name
+  createdAt   DateTime  @default(now())
+
+  @@index([workspaceId, contactId, channel])
+}
+
+model ContactNote {
+  id          String    @id @default(cuid())
+  workspaceId String
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  contactId   String
+  contact     Contact   @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  authorId    String?
+  kind        String    @default("NOTE") // NOTE | CALL_LOG | MEETING
+  body        String
+  createdAt   DateTime  @default(now())
+  deletedAt   DateTime?
+
+  @@index([workspaceId, contactId])
+}
+
+model ContactMilestone {
+  id          String    @id @default(cuid())
+  workspaceId String
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  contactId   String
+  contact     Contact   @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  type        String // BIRTHDAY | HOME_ANNIVERSARY | RELATIONSHIP_ANNIVERSARY | CUSTOM
+  label       String
+  month       Int
+  day         Int
+  year        Int?
+  verified    Boolean   @default(false)
+  source      String    @default("CONTACT_FIELD") // CONTACT_FIELD | AGENT
+  active      Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  messages ScheduledMessage[]
+
+  @@unique([contactId, type, label])
+  @@index([workspaceId, month, day])
+}
+
+model Tag {
+  id          String       @id @default(cuid())
+  workspaceId String
+  workspace   Workspace    @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  name        String
+  createdAt   DateTime     @default(now())
+  contacts    ContactTag[]
+
+  @@unique([workspaceId, name])
+}
+
+model ContactTag {
+  workspaceId String
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  contactId   String
+  contact     Contact   @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  tagId       String
+  tag         Tag       @relation(fields: [tagId], references: [id], onDelete: Cascade)
+  createdAt   DateTime  @default(now())
+
+  @@id([contactId, tagId])
+  @@index([workspaceId, tagId])
+}
+
+model CampaignTemplate {
+  id              String    @id @default(cuid())
+  workspaceId     String
+  workspace       Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  key             String // e.g. NEWSLETTER_MARKET_INSIGHTS, SEASONAL_Q1
+  category        String // NEWSLETTER | SEASONAL | MILESTONE
+  name            String
+  description     String
+  subjectTemplate String
+  bodyTemplate    String
+  topicsJson      String    @default("[]")
+  defaultMonth    Int?
+  defaultDay      Int?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  campaigns       Campaign[]
+
+  @@unique([workspaceId, key])
+}
+
+model Campaign {
+  id                     String    @id @default(cuid())
+  workspaceId            String
+  workspace              Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  templateId             String?
+  template               CampaignTemplate? @relation(fields: [templateId], references: [id], onDelete: SetNull)
+  category               String // NEWSLETTER | SEASONAL
+  kind                   String // MARKET_INSIGHTS | LIFESTYLE_COMMUNITY | SEASONAL_Q1..Q4 | CUSTOM
+  name                   String
+  subject                String
+  previewText            String    @default("")
+  body                   String
+  status                 String    @default("DRAFT") // DRAFT | PENDING_APPROVAL | APPROVED | SCHEDULED | SENT | PAUSED | CANCELLED
+  scheduledFor           DateTime?
+  segmentJson            String    @default("{}")
+  replacesNewsletter     Boolean   @default(false)
+  contentSource          String    @default("MANUAL") // AI_OPENAI | AI_MOCK | TEMPLATE | MANUAL
+  aiNotesJson            String    @default("[]")
+  verifiedMarketData     String?
+  contentVersion         Int       @default(1)
+  approvedContentVersion Int?
+  approvedById           String?
+  approvedAt             DateTime?
+  createdById            String?
+  sentAt                 DateTime?
+  createdAt              DateTime  @default(now())
+  updatedAt              DateTime  @updatedAt
+  deletedAt              DateTime?
+
+  recipients CampaignRecipient[]
+  messages   ScheduledMessage[]
+
+  @@index([workspaceId, status])
+  @@index([workspaceId, scheduledFor])
+}
+
+model CampaignRecipient {
+  id          String    @id @default(cuid())
+  workspaceId String
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  campaignId  String
+  campaign    Campaign  @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  contactId   String
+  contact     Contact   @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  status      String // SCHEDULED | POSTPONED | SKIPPED | SUPPRESSED | SENT | FAILED
+  plannedFor  DateTime?
+  reasonsJson String    @default("[]")
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@unique([campaignId, contactId])
+  @@index([workspaceId, contactId])
+}
+
+// One prepared message for one contact. Preparing never implies sending:
+// delivery happens only in the CAMPAIGN_DUE job after final eligibility checks.
+model ScheduledMessage {
+  id                String    @id @default(cuid())
+  workspaceId       String
+  workspace         Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  contactId         String
+  contact           Contact   @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  campaignId        String?
+  campaign          Campaign? @relation(fields: [campaignId], references: [id], onDelete: SetNull)
+  milestoneId       String?
+  milestone         ContactMilestone? @relation(fields: [milestoneId], references: [id], onDelete: SetNull)
+  category          String // NEWSLETTER | SEASONAL | MILESTONE
+  kind              String
+  channel           String    @default("EMAIL")
+  subject           String
+  body              String
+  status            String // PENDING_APPROVAL | SCHEDULED | SENT | SIMULATED | BLOCKED | FAILED | CANCELLED | SKIPPED
+  scheduledFor      DateTime
+  occurrenceKey     String // e.g. "2026-11-20" for a milestone, campaign id for campaigns
+  idempotencyKey    String    @unique
+  contentSource     String    @default("TEMPLATE")
+  reasonsJson       String    @default("[]")
+  blockedReason     String?
+  approvedById      String?
+  approvedAt        DateTime?
+  sentAt            DateTime?
+  providerMessageId String?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  events CommunicationEvent[]
+
+  @@index([workspaceId, status, scheduledFor])
+  @@index([workspaceId, contactId])
+}
+
+model CommunicationEvent {
+  id                 String    @id @default(cuid())
+  workspaceId        String
+  workspace          Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  contactId          String
+  contact            Contact   @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  scheduledMessageId String?
+  scheduledMessage   ScheduledMessage? @relation(fields: [scheduledMessageId], references: [id], onDelete: SetNull)
+  direction          String // OUTBOUND | INBOUND
+  channel            String // EMAIL | SMS | PHONE | IN_PERSON
+  type               String // SIMULATED_SEND | SENT | DELIVERED | OPENED | CLICKED | BOUNCED | REPLY | CALL | MEETING
+  subject            String?
+  body               String?
+  occurredAt         DateTime
+  source             String // DEMO | SIMULATION | CRM_MOCK | GOHIGHLEVEL | MANUAL | SYSTEM
+  externalId         String? // event source id for idempotent ingestion
+  // Reply intelligence (inbound replies only)
+  classification     String?
+  classificationJson String?
+  triageStatus       String? // NEW | NEEDS_ATTENTION | REVIEWED | ARCHIVED
+  createdAt          DateTime  @default(now())
+
+  opportunities Opportunity[]
+
+  @@unique([workspaceId, source, externalId])
+  @@index([workspaceId, contactId, occurredAt])
+  @@index([workspaceId, direction, triageStatus])
+}
+
+model AiInsight {
+  id           String    @id @default(cuid())
+  workspaceId  String
+  workspace    Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  contactId    String?
+  contact      Contact?  @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  type         String // RECONNECT | UPCOMING_BIRTHDAY | UPCOMING_ANNIVERSARY | PERSONAL_ATTENTION | REAL_ESTATE_INTEREST | REFERRAL | DATA_QUALITY
+  title        String
+  summary      String
+  evidenceJson String    @default("[]") // [{label, value, source}] — grounding
+  confidence   Float     @default(1)
+  source       String    @default("RULES") // RULES | AI_MOCK | AI_OPENAI
+  status       String    @default("ACTIVE") // ACTIVE | DISMISSED | ACTED
+  dedupeKey    String
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  @@unique([workspaceId, dedupeKey])
+  @@index([workspaceId, contactId])
+}
+
+model AgentTask {
+  id             String    @id @default(cuid())
+  workspaceId    String
+  workspace      Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  contactId      String?
+  contact        Contact?  @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  assigneeId     String?
+  assignee       User?     @relation("TaskAssignee", fields: [assigneeId], references: [id], onDelete: SetNull)
+  type           String // CALL | PERSONAL_MESSAGE | GIFT | REVIEW_MESSAGE | REVIEW_REPLY | FOLLOW_UP | APPROVE_CAMPAIGN | RECONNECT | REFERRAL_FOLLOW_UP | VERIFY_DATA
+  title          String
+  description    String    @default("")
+  reasonsJson    String    @default("[]")
+  intent         String? // reply classification that triggered the task, if any
+  priority       Int       @default(50) // 0–100, computed deterministically
+  dueAt          DateTime?
+  status         String    @default("OPEN") // OPEN | DONE | DISMISSED
+  completedAt    DateTime?
+  sourceType     String? // MILESTONE | REPLY | OPPORTUNITY | CAMPAIGN | INSIGHT | MANUAL
+  sourceId       String?
+  dedupeKey      String
+  externalTaskId String?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  @@unique([workspaceId, dedupeKey])
+  @@index([workspaceId, status, priority])
+}
+
+model Opportunity {
+  id                   String    @id @default(cuid())
+  workspaceId          String
+  workspace            Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  contactId            String
+  contact              Contact   @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  type                 String // BUYER | SELLER | INVESTOR | REFERRAL | FUTURE
+  // Detected opportunities start as POTENTIAL. Only an agent can confirm them.
+  status               String    @default("POTENTIAL") // POTENTIAL | CONFIRMED | APPOINTMENT_SET | WON | LOST | DISMISSED
+  timeframe            String?
+  summary              String
+  evidence             String? // the verbatim text that triggered detection
+  sourceEventId        String?
+  sourceEvent          CommunicationEvent? @relation(fields: [sourceEventId], references: [id], onDelete: SetNull)
+  attributedCampaignId String?
+  appointmentAt        DateTime?
+  confirmedById        String?
+  confirmedAt          DateTime?
+  externalId           String?
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
+
+  @@unique([workspaceId, sourceEventId, type])
+  @@index([workspaceId, status])
+}
+
+model AutomationJob {
+  id             String    @id @default(cuid())
+  workspaceId    String
+  workspace      Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  type           String // see src/lib/domain/types.ts AUTOMATION_EVENTS
+  payloadJson    String    @default("{}")
+  status         String    @default("PENDING") // PENDING | RUNNING | SUCCEEDED | FAILED | DEAD | PAUSED | CANCELLED
+  runAt          DateTime
+  attempts       Int       @default(0)
+  maxAttempts    Int       @default(3)
+  lastError      String?
+  resultJson     String?
+  idempotencyKey String
+  lockedAt       DateTime?
+  lockedBy       String?
+  completedAt    DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  @@unique([workspaceId, idempotencyKey])
+  @@index([status, runAt])
+  @@index([workspaceId, status])
+}
+
+model Integration {
+  id                   String    @id @default(cuid())
+  workspaceId          String
+  workspace            Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  provider             String // GOHIGHLEVEL
+  mode                 String    @default("MOCK") // MOCK | LIVE
+  status               String    @default("DISCONNECTED") // DISCONNECTED | CONNECTED | ERROR
+  authMethod           String? // PRIVATE_INTEGRATION_TOKEN | OAUTH (future)
+  locationId           String?
+  accountName          String?
+  encryptedCredentials String? // AES-256-GCM, never sent to the browser
+  liveSendEnabled      Boolean   @default(false)
+  lastSyncAt           DateTime?
+  lastError            String?
+  connectedAt          DateTime?
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
+
+  syncLogs IntegrationSyncLog[]
+  mappings IntegrationMapping[]
+
+  @@unique([workspaceId, provider])
+}
+
+model IntegrationMapping {
+  id            String      @id @default(cuid())
+  workspaceId   String
+  workspace     Workspace   @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  integrationId String
+  integration   Integration @relation(fields: [integrationId], references: [id], onDelete: Cascade)
+  contactId     String
+  contact       Contact     @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  externalId    String
+  syncHash      String?
+  syncStatus    String      @default("SYNCED") // SYNCED | CONFLICT | ERROR
+  lastSyncedAt  DateTime?
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  @@unique([integrationId, externalId])
+  @@unique([integrationId, contactId])
+}
+
+model IntegrationSyncLog {
+  id            String      @id @default(cuid())
+  workspaceId   String
+  workspace     Workspace   @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  integrationId String
+  integration   Integration @relation(fields: [integrationId], references: [id], onDelete: Cascade)
+  action        String // CONTACT_PULL | CONTACT_PUSH | WEBHOOK | CONNECT | DISCONNECT | TEST
+  status        String // SUCCESS | PARTIAL | FAILED | SKIPPED
+  message       String
+  statsJson     String      @default("{}")
+  createdAt     DateTime    @default(now())
+
+  @@index([workspaceId, createdAt])
+}
+
+model AuditLog {
+  id          String    @id @default(cuid())
+  workspaceId String
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  actorType   String // USER | SYSTEM | AI | INTEGRATION
+  actorId     String?
+  action      String
+  entityType  String
+  entityId    String?
+  fromStatus  String?
+  toStatus    String?
+  detailsJson String    @default("{}")
+  createdAt   DateTime  @default(now())
+
+  @@index([workspaceId, createdAt])
+  @@index([workspaceId, entityType, entityId])
+}

@@ -1,0 +1,48 @@
+{
+  "name": "realtor-growth-os",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Realtor Growth OS — Module 01: AI Relationship Manager (past clients & sphere of influence).",
+  "scripts": {
+    "dev": "next dev --port 3100",
+    "build": "next build",
+    "start": "next start --port 3100",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "postinstall": "prisma generate",
+    "db:generate": "prisma generate",
+    "db:push": "prisma db push",
+    "db:seed": "tsx scripts/seed.ts",
+    "demo:reset": "prisma db push && tsx scripts/seed.ts --reset",
+    "setup": "prisma db push && tsx scripts/seed.ts",
+    "jobs:process": "tsx scripts/process-jobs.ts",
+    "jobs:plan": "tsx scripts/run-planner.ts"
+  },
+  "dependencies": {
+    "@prisma/adapter-better-sqlite3": "7.10.1",
+    "@prisma/client": "7.10.1",
+    "better-sqlite3": "^13.1.1",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "lucide-react": "^1.72.0",
+    "next": "16.4.6",
+    "react": "19.2.0",
+    "react-dom": "19.2.0",
+    "recharts": "^3.10.1",
+    "tailwind-merge": "^3.7.0",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4.3.5",
+    "@types/better-sqlite3": "^9.6.0",
+    "@types/node": "^22.10.0",
+    "@types/react": "^19.2.0",
+    "@types/react-dom": "^19.2.0",
+    "prisma": "7.10.1",
+    "tailwindcss": "^4.3.5",
+    "tsx": "^4.23.15",
+    "typescript": "^5.7.0",
+    "vitest": "^5.1.0"
+  }
+}

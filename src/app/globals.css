@@ -1,4 +1,6 @@
 @import "tailwindcss";
+/* The Growth OS app in /growth-os is a separate Next.js project. */
+@source not "../../growth-os";
 
 @theme {
   --color-ink: #141310;
