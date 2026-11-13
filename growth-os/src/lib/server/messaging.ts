@@ -34,13 +34,13 @@ export const messageKey = {
 async function committedFor(ctx: Ctx, contactId: string, tz: string, excludeId?: string): Promise<CommittedMessage[]> {
   const msgs = await prisma.scheduledMessage.findMany({
     where: { workspaceId: ctx.workspaceId, contactId, status: { in: ACTIVE_MESSAGE_STATUSES }, ...(excludeId ? { id: { not: excludeId } } : {}) },
-    include: { campaign: { select: { replacesNewsletter: true } } },
+    include: { campaign: { select: { replacesNewsletter: true, name: true } } },
   });
   return msgs.map((m) => ({
     key: m.idempotencyKey,
     category: m.category as MessageCategory,
     date: toLocalDate(m.scheduledFor, tz),
-    label: m.category === "MILESTONE" ? (MILESTONE_LABEL[m.kind as MilestoneType] ?? "Milestone") : m.subject,
+    label: m.category === "MILESTONE" ? (MILESTONE_LABEL[m.kind as MilestoneType] ?? "Milestone") : (m.campaign?.name ?? m.subject),
     replacesNewsletter: m.campaign?.replacesNewsletter ?? false,
   }));
 }

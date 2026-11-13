@@ -17,7 +17,8 @@
     "demo:reset": "prisma db push && tsx scripts/seed.ts --reset",
     "setup": "prisma db push && tsx scripts/seed.ts",
     "jobs:process": "tsx scripts/process-jobs.ts",
-    "jobs:plan": "tsx scripts/run-planner.ts"
+    "jobs:plan": "tsx scripts/run-planner.ts",
+    "workspace:create": "tsx scripts/create-workspace.ts"
   },
   "dependencies": {
     "@prisma/adapter-better-sqlite3": "7.10.1",

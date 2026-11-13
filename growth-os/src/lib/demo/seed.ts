@@ -283,7 +283,8 @@ export async function seedDemoWorkspace(opts: { reset?: boolean; now?: Date } = 
         birthdayVerified: birthdayMonth !== null && !s.bdayUnverified,
         closingDate,
         closingDateVerified: !!closingDate && !s.anniv?.unverified,
-        relationshipStartDate: s.type === "SPHERE" ? localToDateOnly(addDays(today, -(s.createdMonthsAgo * 30 + 400))) : null,
+        // Known relationship start dates only for a couple of long-standing sphere relationships.
+        relationshipStartDate: ["Benjamin Adeyemi", "Isabella Russo"].includes(`${s.first} ${s.last}`) ? localToDateOnly(addDays(today, 18 - 365 * (s.first === "Benjamin" ? 6 : 4))) : null,
         propertyAddress: s.type === "PAST_CLIENT" && s.street ? `${s.street}, ${s.city}, AZ` : null,
         neighborhood: s.hood,
         city: s.city,

@@ -132,3 +132,16 @@ design-reference/ the original single-page HTML concept this site grew from
 - Fonts are Cormorant Garamond (display) and Inter (body) via `next/font`, self-hosted
   at build time.
 - All pages except `/api/lead` are statically prerendered.
+
+---
+
+## Realtor Growth OS (separate app)
+
+[`growth-os/`](growth-os/README.md) contains **Realtor Growth OS — Module 01: AI Relationship
+Manager**, a separate Next.js app for nurturing past clients and sphere of influence.
+It has its own dependencies and database and does not affect this website's build or
+deployment. Quick start:
+
+```bash
+cd growth-os && npm install && npm run setup && npm run dev   # http://localhost:3100
+```

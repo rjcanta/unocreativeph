@@ -1,0 +1,57 @@
+@import "tailwindcss";
+
+/* Realtor Growth OS — calm, human, premium-but-friendly. */
+@theme {
+  --color-canvas: #f7f6f2;
+  --color-surface: #ffffff;
+  --color-subtle: #f1efe9;
+  --color-ink: #1f2421;
+  --color-ink-muted: #5d635f;
+  --color-ink-faint: #8a8f8a;
+  --color-line: #e5e1d8;
+  --color-line-strong: #d3cdc0;
+
+  --color-sage-50: #f1f5f1;
+  --color-sage-100: #e1eae2;
+  --color-sage-200: #c4d5c7;
+  --color-sage-400: #7d9a85;
+  --color-sage-500: #5f7f69;
+  --color-sage-600: #4c6a56;
+  --color-sage-700: #3c5444;
+  --color-sage-800: #2e4035;
+
+  --color-sand-50: #faf6ef;
+  --color-sand-100: #f2eadb;
+  --color-sand-200: #e6d8bf;
+  --color-clay-500: #a8754d;
+  --color-clay-600: #8d5f3c;
+
+  --color-amber-50: #fbf5e8;
+  --color-amber-600: #a26a12;
+  --color-rose-50: #fbefed;
+  --color-rose-600: #a8463c;
+  --color-sky-50: #eef4f8;
+  --color-sky-600: #3d6a88;
+
+  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Inter, Roboto, "Helvetica Neue", Arial, sans-serif;
+  --radius-card: 14px;
+  --shadow-card: 0 1px 2px rgb(31 36 33 / 0.04), 0 1px 1px rgb(31 36 33 / 0.03);
+}
+
+@layer base {
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    background: var(--color-canvas);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    font-feature-settings: "tnum" 0;
+  }
+  ::selection { background: var(--color-sage-200); }
+  :focus-visible { outline: 2px solid var(--color-sage-500); outline-offset: 2px; }
+  dialog::backdrop { background: rgb(31 36 33 / 0.35); }
+}
+
+@layer components {
+  .tabular { font-variant-numeric: tabular-nums; }
+}

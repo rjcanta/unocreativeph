@@ -53,7 +53,10 @@ export function appMode(): "demo" | "live" {
 
 export async function getSession(): Promise<Session> {
   if (authMode() !== "demo") throw new AuthNotConfiguredError();
-  const ws = await prisma.workspace.findUnique({ where: { slug: DEMO_WORKSPACE_SLUG } });
+  // Local single-operator override for testing a real (non-demo) workspace.
+  // This is still demo authentication — anyone who can reach the app is this user.
+  const slug = process.env.WORKSPACE_SLUG?.trim() || DEMO_WORKSPACE_SLUG;
+  const ws = await prisma.workspace.findUnique({ where: { slug } });
   if (!ws) throw new NotSetUpError();
   const user = await prisma.user.findFirst({ where: { workspaceId: ws.id, role: "OWNER", deletedAt: null }, orderBy: { createdAt: "asc" } });
   if (!user) throw new NotSetUpError();
